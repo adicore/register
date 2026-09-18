@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pendaftaran Klien Otomatis - SaaS Travego</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; }
+        .container { max-width: 600px; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin: auto; }
+        h2 { color: #333; text-align: center; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+        input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; background: #ff6600; color: white; border: none; padding: 12px; font-size: 16px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #e55b00; }
+        #responseMessage { margin-top: 20px; padding: 10px; border-radius: 4px; text-align: center; display: none; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Form Setup Klien Otomatis</h2>
+    <form id="clientForm">
+        <div class="form-group">
+            <label>Nama Klien / Perusahaan:</label>
+            <input type="text" id="name" required placeholder="Contoh: Budi Santoso">
+        </div>
+        <div class="form-group">
+            <label>Domain Klien (Opsional):</label>
+            <input type="text" id="domain" placeholder="Contoh: travelbudi.com">
+        </div>
+        <div class="form-group">
+            <label>Cloudflare Account ID:</label>
+            <input type="text" id="accountId" required placeholder="Masukkan Account ID Cloudflare klien">
+        </div>
+        <div class="form-group">
+            <label>Cloudflare API Token:</label>
+            <input type="password" id="token" required placeholder="Token dengan akses Workers & KV & D1">
+        </div>
+        <div class="form-group">
+            <label>Nama Worker (Subdomain/Slug):</label>
+            <input type="text" id="workerName" required placeholder="Contoh: cms-budi">
+        </div>
+        <div class="form-group">
+            <label>KV Namespace ID (Klien):</label>
+            <input type="text" id="kvId" required placeholder="ID KV Namespace di akun klien">
+        </div>
+        <div class="form-group">
+            <label>D1 Database ID (Klien):</label>
+            <input type="text" id="databaseId" required placeholder="ID Database D1 di akun klien">
+        </div>
+        
+        <button type="submit" id="submitBtn">Daftar & Deploy Otomatis</button>
+    </form>
+
+    <div id="responseMessage"></div>
+</div>
+
+<script>
+    document.getElementById('clientForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const btn = document.getElementById('submitBtn');
+        const msgBox = document.getElementById('responseMessage');
+        
+        // Ambil data dari form
+        const payload = {
+            name: document.getElementById('name').value,
+            domain: document.getElementById('domain').value,
+            accountId: document.getElementById('accountId').value,
+            token: document.getElementById('token').value,
+            workerName: document.getElementById('workerName').value,
+            kvId: document.getElementById('kvId').value,
+            databaseId: document.getElementById('databaseId').value
+        };
+
+        btn.disabled = true;
+        btn.innerText = "Sedang Memproses & Deploy ke Akun Klien...";
+        msgBox.style.display = 'none';
+
+        try {
+            // Ganti URL di bawah dengan URL Worker Pusat Anda yang aktif di Cloudflare
+            const response = await fetch('https://dashboard-admin-pusat.NAMA-ANDA.workers.dev/api/register-client', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+
+            msgBox.style.display = 'block';
+            if (response.ok && result.success) {
+                msgBox.className = 'success';
+                msgBox.innerText = "Berhasil! " + result.message;
+                document.getElementById('clientForm').reset();
+            } else {
+                msgBox.className = 'error';
+                msgBox.innerText = "Gagal: " + (result.error || 'Terjadi kesalahan sistem.');
+            }
+        } catch (err) {
+            msgBox.style.display = 'block';
+            msgBox.className = 'error';
+            msgBox.innerText = "Kesalahan Jaringan: " + err.message;
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "Daftar & Deploy Otomatis";
+        }
+    });
+</script>
+
+</body>
+</html>
