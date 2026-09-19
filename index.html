@@ -51,6 +51,27 @@
             <label>D1 Database ID (Klien):</label>
             <input type="text" id="databaseId" required placeholder="ID Database D1 di akun klien">
         </div>
+        <!-- KELOMPOK INPUT VARIABEL (Teks Biasa) -->
+<div class="form-group mb-3">
+  <label for="githubOwner">GitHub Owner / Username Klien</label>
+  <input type="text" id="githubOwner" class="form-control" placeholder="Contoh: nama-klien" required>
+</div>
+
+<div class="form-group mb-3">
+  <label for="githubRepo">Nama Repositori GitHub</label>
+  <input type="text" id="githubRepo" class="form-control" placeholder="Contoh: my-blog-repo" required>
+</div>
+
+<!-- KELOMPOK INPUT SECRETS (Rahasia) -->
+<div class="form-group mb-3">
+  <label for="githubPat">GitHub Personal Access Token (PAT)</label>
+  <input type="password" id="githubPat" class="form-control" placeholder="ghp_xxxxxxxxxxxx" required>
+</div>
+
+<div class="form-group mb-3">
+  <label for="groqApiKey">Groq API Key</label>
+  <input type="password" id="groqApiKey" class="form-control" placeholder="gsk_xxxxxxxxxxxx" required>
+</div>
         
         <button type="submit" id="submitBtn">Daftar & Deploy Otomatis</button>
     </form>
@@ -59,58 +80,75 @@
 </div>
 
 <script>
-    document.getElementById('clientForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        const btn = document.getElementById('submitBtn');
-        const msgBox = document.getElementById('responseMessage');
-        
-        // Ambil data dari form
-        const payload = {
-            name: document.getElementById('name').value,
-            domain: document.getElementById('domain').value,
-            accountId: document.getElementById('accountId').value,
-            token: document.getElementById('token').value,
-            workerName: document.getElementById('workerName').value,
-            kvId: document.getElementById('kvId').value,
-            databaseId: document.getElementById('databaseId').value
+// Pastikan ID form Anda adalah 'registerForm' (sesuaikan jika berbeda)
+document.getElementById('registerForm').addEventListener('submit', async function(event) {
+    // Mencegah form melakukan reload halaman bawaan browser
+    event.preventDefault();
+
+    // 1. Ambil referensi tombol submit untuk memberikan efek "Loading"
+    const submitBtn = document.getElementById('submitBtn'); // Pastikan tombol submit memiliki id="submitBtn"
+    const originalBtnText = submitBtn.innerText;
+    submitBtn.innerText = "Memproses Deployment (Mohon Tunggu)...";
+    submitBtn.disabled = true;
+
+    try {
+        // 2. Susun Data Payload JSON
+        const clientData = {
+            // A. Data Utama Klien & Cloudflare
+            name: document.getElementById("name").value.trim(),
+            domain: document.getElementById("domain").value.trim(),
+            accountId: document.getElementById("accountId").value.trim(),
+            token: document.getElementById("token").value.trim(),
+            workerName: document.getElementById("workerName").value.trim(),
+            kvId: document.getElementById("kvId").value.trim(),
+            databaseId: document.getElementById("databaseId").value.trim(),
+            
+            // B. Variabel Environment Biasa (Plain Text)
+            vars: {
+                "GITHUB_OWNER": document.getElementById("githubOwner").value.trim(),
+                "GITHUB_REPO": document.getElementById("githubRepo").value.trim()
+            },
+            
+            // C. Variabel Rahasia (Encrypted Secrets)
+            secrets: {
+                "GITHUB_PAT": document.getElementById("githubPat").value.trim(),
+                "GROQ_API_KEY": document.getElementById("groqApiKey").value.trim()
+            }
         };
 
-        btn.disabled = true;
-        btn.innerText = "Sedang Memproses & Deploy ke Akun Klien...";
-        msgBox.style.display = 'none';
+        // 3. Tembak API Worker Pusat
+        const response = await fetch("https://dashboard-admin-pusat.accessed.workers.dev/api/register-client", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(clientData)
+        });
 
-        try {
-            // Ganti URL di bawah dengan URL Worker Pusat Anda yang aktif di Cloudflare
-            const response = await fetch('https://dashboard-admin-pusat.accessed.workers.dev/api/register-client', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            });
+        // 4. Parsing JSON Respons dari Server
+        const result = await response.json();
 
-            const result = await response.json();
-
-            msgBox.style.display = 'block';
-            if (response.ok && result.success) {
-                msgBox.className = 'success';
-                msgBox.innerText = "Berhasil! " + result.message;
-                document.getElementById('clientForm').reset();
-            } else {
-                msgBox.className = 'error';
-                msgBox.innerText = "Gagal: " + (result.error || 'Terjadi kesalahan sistem.');
-            }
-        } catch (err) {
-            msgBox.style.display = 'block';
-            msgBox.className = 'error';
-            msgBox.innerText = "Kesalahan Jaringan: " + err.message;
-        } finally {
-            btn.disabled = false;
-            btn.innerText = "Daftar & Deploy Otomatis";
+        // 5. Evaluasi Hasil
+        if (response.ok && result.success) {
+            alert("🎉 Pendaftaran Berhasil!\n\nSistem telah mendeploy Worker, Cron, Queue, dan menginjeksi Secrets klien ke Cloudflare.");
+            
+            // Opsional: Mengosongkan form setelah sukses
+            document.getElementById('registerForm').reset();
+        } else {
+            console.error("Detail Error API:", result);
+            alert("❌ Proses Gagal:\n" + (result.error || "Terjadi kesalahan di server pusat."));
         }
-    });
-</script>
 
+    } catch (err) {
+        // Penanganan error jika gagal koneksi (misal internet putus atau Worker Pusat down)
+        console.error("Error Jaringan:", err);
+        alert("⚠️ Terjadi kesalahan jaringan. Gagal terhubung ke server pusat.");
+    } finally {
+        // 6. Kembalikan kondisi tombol seperti semula
+        submitBtn.innerText = originalBtnText;
+        submitBtn.disabled = false;
+    }
+});
+</script>
 </body>
 </html>
