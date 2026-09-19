@@ -100,6 +100,7 @@ document.getElementById('registerForm').addEventListener('submit', async functio
         const clientData = {
             // A. Data Utama Klien & Cloudflare
             name: document.getElementById("name").value.trim(),
+            email: document.getElementById("clientEmail").value.trim(),
             domain: document.getElementById("domain").value.trim(),
             accountId: document.getElementById("accountId").value.trim(),
             token: document.getElementById("token").value.trim(),
