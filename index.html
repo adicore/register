@@ -102,12 +102,17 @@ document.getElementById('registerForm').addEventListener('submit', async functio
             workerName: document.getElementById("workerName").value.trim(),
             kvId: document.getElementById("kvId").value.trim(),
             databaseId: document.getElementById("databaseId").value.trim(),
-            
+
             // B. Variabel Environment Biasa (Plain Text)
-            vars: {
-                "GITHUB_OWNER": document.getElementById("githubOwner").value.trim(),
-                "GITHUB_REPO": document.getElementById("githubRepo").value.trim()
-            },
+    vars: {
+        // --- 1. Repo Pusat untuk Render UI Dashboard (Selalu Milik Anda) ---
+        "GITHUB_ADMIN_OWNER": "adicore", 
+        "GITHUB_ADMIN_REPO": "dashboard_travego",
+        
+        // --- 2. Repo Frontend untuk Simpan Artikel (Milik Klien) ---
+        "GITHUB_OWNER": document.getElementById("githubOwner").value.trim(),
+        "GITHUB_REPO": document.getElementById("githubRepo").value.trim()
+    },
             
             // C. Variabel Rahasia (Encrypted Secrets)
             secrets: {
