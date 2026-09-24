@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup Infrastruktur - SaaS Travego</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 90vh;}
+        .card { width: 100%; max-width: 550px; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { color: #333; text-align: center; margin-top: 0; }
+        .text-center { text-align: center; }
+        .step-container { display: none; }
+        .step-container.active { display: block; animation: fadeIn 0.5s; }
+        
+        .form-group { margin-bottom: 18px; }
+        label { display: block; margin-bottom: 6px; font-weight: bold; color: #444; font-size: 14px; }
+        input { width: 100%; padding: 11px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        input:focus { border-color: #ff6600; outline: none; }
+        
+        button { width: 100%; background: #007bff; color: white; border: none; padding: 14px; font-size: 16px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 15px;}
+        button:hover { background: #0056b3; }
+        button:disabled { background: #cccccc; cursor: not-allowed; }
+
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #ff6600; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .alert { padding: 15px; background: #d4edda; color: #155724; border-radius: 4px; margin-bottom: 20px; font-size: 14px; text-align: center; }
+        .alert-error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    
+    <!-- STEP 1: VERIFIKASI PEMBAYARAN -->
+    <div id="step-verify" class="step-container active text-center">
+        <div class="loader"></div>
+        <h2>Memverifikasi Pembayaran...</h2>
+        <p style="color: #666;">Mohon tunggu sebentar, kami sedang mengkonfirmasi pembayaran PayPal Anda.</p>
+        <div id="verifyError" class="alert alert-error" style="display: none; margin-top: 20px;"></div>
+    </div>
+
+    <!-- STEP 2: FORM CLOUDFLARE SETUP -->
+    <div id="step-form" class="step-container">
+        <h2>Setup Infrastruktur Toko</h2>
+        <div class="alert">✅ Pembayaran Berhasil! Langkah terakhir: Hubungkan Cloudflare Anda.</div>
+        
+        <form id="onboardingForm">
+            <div class="form-group">
+                <label>Cloudflare Account ID:</label>
+                <input type="text" id="cfAccountId" required placeholder="Contoh: 1234abcd5678efgh...">
+            </div>
+            <div class="form-group">
+                <label>Cloudflare API Token:</label>
+                <input type="password" id="cfToken" required placeholder="Token dengan akses Edit Workers & D1">
+            </div>
+            <div class="form-group">
+                <label>Nama Worker Baru (Bebas):</label>
+                <input type="text" id="cfWorkerName" required placeholder="Contoh: toko-budi-cms">
+            </div>
+            <div class="form-group">
+                <label>KV Namespace ID (Kosong = Dibuat Manual):</label>
+                <input type="text" id="cfKvId" required placeholder="ID KV Namespace Anda">
+            </div>
+            <div class="form-group">
+                <label>D1 Database ID (Kosong = Dibuat Manual):</label>
+                <input type="text" id="cfD1Id" required placeholder="ID Database D1 Anda">
+            </div>
+            
+            <button type="submit" id="btnDeploy">🚀 Deploy Dashboard Saya Sekarang</button>
+        </form>
+    </div>
+
+    <!-- STEP 3: DEPLOYMENT LOADING -->
+    <div id="step-deploying" class="step-container text-center">
+        <div class="loader" style="border-top-color: #007bff;"></div>
+        <h2>Membangun Sistem Anda...</h2>
+        <p style="color: #666;">Sedang mengunggah sistem CMS dan menyuntikkan database ke akun Cloudflare Anda. Proses ini memakan waktu sekitar 10-20 detik.</p>
+        <p style="font-size: 12px; color: #999;">(Anda akan otomatis diarahkan ke Dashboard setelah selesai)</p>
+    </div>
+
+</div>
+
+<script>
+const API_BASE = "https://dashboard-admin-pusat.accessed.workers.dev/api";
+let paypalOrderId = "";
+
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Ambil Order ID dari URL (Sistem redirect PayPal)
+    const urlParams = new URLSearchParams(window.location.search);
+    paypalOrderId = urlParams.get('token');
+
+    if (!paypalOrderId) {
+        document.getElementById('verifyError').innerText = "Akses tidak sah. Token pembayaran tidak ditemukan.";
+        document.getElementById('verifyError').style.display = 'block';
+        document.querySelector('.loader').style.display = 'none';
+        return;
+    }
+
+    // 2. Tembak API Capture Payment
+    fetch(`${API_BASE}/capture-payment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paypal_order_id: paypalOrderId })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            // Lanjut ke form setup
+            document.getElementById('step-verify').classList.remove('active');
+            document.getElementById('step-form').classList.add('active');
+        } else {
+            throw new Error(data.error || "Pembayaran gagal diverifikasi.");
+        }
+    })
+    .catch(err => {
+        document.getElementById('verifyError').innerText = err.message;
+        document.getElementById('verifyError').style.display = 'block';
+        document.querySelector('.loader').style.display = 'none';
+    });
+});
+
+// 3. Handle Submit Form Deploy
+document.getElementById('onboardingForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    // Ambil data user dari LocalStorage (yang disimpan di halaman register)
+    const savedDataStr = localStorage.getItem('travego_setup_data');
+    if (!savedDataStr) {
+        alert("Data sesi pendaftaran hilang. Pastikan Anda mendaftar melalui halaman resmi.");
+        return;
+    }
+    
+    const clientData = JSON.parse(savedDataStr);
+    
+    // Gabungkan data profil dengan data Cloudflare dari form ini
+    const deployPayload = {
+        paypal_order_id: paypalOrderId,
+        name: clientData.name,
+        email: clientData.email,
+        password: clientData.password,
+        domain: clientData.domain,
+        dashboardVersion: clientData.product_version,
+        
+        accountId: document.getElementById('cfAccountId').value.trim(),
+        token: document.getElementById('cfToken').value.trim(),
+        workerName: document.getElementById('cfWorkerName').value.trim(),
+        kvId: document.getElementById('cfKvId').value.trim(),
+        databaseId: document.getElementById('cfD1Id').value.trim()
+    };
+
+    // Pindah UI ke status Deploying
+    document.getElementById('step-form').classList.remove('active');
+    document.getElementById('step-deploying').classList.add('active');
+
+    try {
+        const response = await fetch(`${API_BASE}/deploy-client`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(deployPayload)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.success && result.magic_url) {
+            // Bersihkan local storage demi keamanan
+            localStorage.removeItem('travego_setup_data');
+            
+            // REDIRECT OTOMATIS (Bypass Login)
+            window.location.href = result.magic_url;
+        } else {
+            throw new Error(result.error || "Gagal membangun infrastruktur.");
+        }
+    } catch (err) {
+        alert("❌ Deployment Gagal: " + err.message + "\n\nSilakan refresh halaman ini untuk mencoba lagi.");
+        // Kembalikan ke UI Form
+        document.getElementById('step-deploying').classList.remove('active');
+        document.getElementById('step-form').classList.add('active');
+    }
+});
+</script>
+</body>
+</html>
