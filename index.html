@@ -59,6 +59,17 @@
             <input type="password" id="clientPassword" placeholder="••••••••" required>
         </div>
 
+        <div class="section-title">3. Integrasi GitHub (Opsional / Untuk CI/CD)</div>
+        <div class="form-group">
+            <label>GitHub Personal Access Token (PAT):</label>
+            <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxx">
+            <span class="note">Diperlukan agar sistem dapat otomatis mengatur CI/CD Pages.</span>
+        </div>
+        <div class="form-group">
+            <label>Nama Repository GitHub (Format: username/repo):</label>
+            <input type="text" id="githubRepo" placeholder="Contoh: budisantoso/my-travel-site">
+        </div>
+
         <div class="billing-box">
             <div class="billing-title">Total Pembayaran Anda:</div>
             <div class="billing-price" id="totalPriceDisplay">$0.00</div>
@@ -89,14 +100,18 @@ document.getElementById('registerForm').addEventListener('submit', async functio
     submitBtn.innerHTML = '⏳ Menyiapkan Checkout PayPal...';
     submitBtn.disabled = true;
 
-    // Simpan data dasar di LocalStorage untuk digunakan di halaman onboarding nanti
+    // Simpan data dasar termasuk token GitHub ke LocalStorage untuk digunakan di onboarding
     const clientBasicData = {
         product_version: dashboardVersion,
         amount: priceAmount,
         name: document.getElementById("name").value.trim(),
         email: document.getElementById("clientEmail").value.trim(),
         password: document.getElementById("clientPassword").value.trim(),
-        domain: document.getElementById("domain").value.trim()
+        domain: document.getElementById("domain").value.trim(),
+        secrets: {
+            GITHUB_TOKEN: document.getElementById("githubToken").value.trim(),
+            GITHUB_REPO: document.getElementById("githubRepo").value.trim()
+        }
     };
     localStorage.setItem('travego_setup_data', JSON.stringify(clientBasicData));
 
