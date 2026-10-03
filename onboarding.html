@@ -36,7 +36,7 @@
     <div id="step-deploying" class="step-container text-center">
         <div class="loader" style="border-top-color: #007bff;"></div>
         <h2>Merakit Infrastruktur Secara Otomatis...</h2>
-        <div class="alert" style="margin-top: 15px;">✅ Pembayaran Berhasil! Sistem sedang membuat Worker, Database D1, KV, Repo GitHub Mandiri, Injeksi CI/CD Workflow, serta Setting Custom Domain di akun Cloudflare & GitHub Anda.</div>
+        <div class="alert" style="margin-top: 15px;">✅ Pembayaran Berhasil! Sistem sedang membuat KV Namespace, Database D1, Worker, Repo GitHub Mandiri, Injeksi CI/CD Workflow, serta Setting Custom Domain secara otomatis di akun Anda.</div>
         <p style="color: #666; font-size: 14px;">Mohon jangan menutup halaman ini sampai proses selesai...</p>
     </div>
 
@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('step-verify').classList.remove('active');
         document.getElementById('step-deploying').classList.add('active');
 
-        // 3. Panggil API Deploy Otomatis (BYOK)
+        // 3. Panggil API Deploy Otomatis
         const deployRes = await fetch(`${API_BASE}/deploy-client`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
