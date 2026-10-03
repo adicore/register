@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Setup Infrastruktur - SaaS CMS Dashboard</title>
+    <title>Setup Infrastruktur Selesai - SaaS CMS Dashboard</title>
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 90vh;}
-        .card { width: 100%; max-width: 500px; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .card { width: 100%; max-width: 550px; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         h2 { color: #333; text-align: center; margin-top: 0; }
         .text-center { text-align: center; }
         .step-container { display: none; }
@@ -18,6 +18,13 @@
         
         .alert { padding: 15px; background: #d4edda; color: #155724; border-radius: 4px; margin-bottom: 20px; font-size: 14px; text-align: center; }
         .alert-error { background: #f8d7da; color: #721c24; }
+        
+        .info-box { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 6px; padding: 20px; margin: 20px 0; text-align: left; }
+        .info-item { margin-bottom: 12px; font-size: 14px; color: #333; word-break: break-all; }
+        .info-item strong { color: #555; display: inline-block; width: 130px; }
+        
+        .btn-primary { display: block; width: 100%; background: #ff6600; color: white; text-align: center; text-decoration: none; padding: 14px; font-size: 16px; border-radius: 4px; font-weight: bold; box-sizing: border-box; margin-top: 20px; }
+        .btn-primary:hover { background: #e55b00; }
     </style>
 </head>
 <body>
@@ -36,8 +43,24 @@
     <div id="step-deploying" class="step-container text-center">
         <div class="loader" style="border-top-color: #007bff;"></div>
         <h2>Merakit Infrastruktur Secara Otomatis...</h2>
-        <div class="alert" style="margin-top: 15px;">✅ Pembayaran Berhasil! Sistem sedang membuat KV Namespace, Database D1, Worker, Repo GitHub Mandiri, Injeksi CI/CD Workflow, serta Setting Custom Domain secara otomatis di akun Anda.</div>
+        <div class="alert" style="margin-top: 15px;">⏳ Pembayaran Berhasil! Sistem sedang merakit Worker, Database D1, KV, Repo GitHub, Injeksi Workflow CI/CD, serta Konfigurasi Custom Domain Anda.</div>
         <p style="color: #666; font-size: 14px;">Mohon jangan menutup halaman ini sampai proses selesai...</p>
+    </div>
+
+    <!-- STEP 3: HALAMAN SUKSES (SUCCESS PAGE) -->
+    <div id="step-success" class="step-container">
+        <div style="text-align: center; font-size: 48px; margin-bottom: 10px;">🎉</div>
+        <h2>Deployment Berhasil!</h2>
+        <div class="alert">Infrastruktur mandiri Anda telah sukses dirakit dan aktif sepenuhnya di akun Anda.</div>
+        
+        <div class="info-box">
+            <div class="info-item"><strong>Email Login:</strong> <span id="lblEmail">-</span></div>
+            <div class="info-item"><strong>URL Dashboard:</strong> <a id="lblDomain" href="#" target="_blank" style="color: #007bff;">-</a></div>
+        </div>
+
+        <p style="font-size: 13px; color: #666; text-align: center;">Klik tombol di bawah ini untuk masuk ke dasbor CMS Anda secara otomatis menggunakan tautan aman (Magic Link):</p>
+        
+        <a id="btnMagicLogin" href="#" class="btn-primary" target="_blank">🚀 Masuk ke Dasbor Admin Sekarang</a>
     </div>
 
 </div>
@@ -94,8 +117,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         if (deployRes.ok && deployResult.success && deployResult.magic_url) {
             localStorage.removeItem('travego_setup_data');
-            // Redirect otomatis ke Magic Link Dasbor Klien
-            window.location.href = deployResult.magic_url;
+            
+            // Tampilkan halaman sukses alih-alih redirect otomatis
+            document.getElementById('step-deploying').classList.remove('active');
+            document.getElementById('step-success').classList.add('active');
+
+            document.getElementById('lblEmail').innerText = clientData.email;
+            const domainUrl = `https://${deployResult.admin_domain}`;
+            const domainLink = document.getElementById('lblDomain');
+            domainLink.innerText = deployResult.admin_domain;
+            domainLink.href = domainUrl;
+
+            document.getElementById('btnMagicLogin').href = deployResult.magic_url;
         } else {
             throw new Error(deployResult.error || "Gagal membangun infrastruktur otomatis.");
         }
@@ -107,6 +140,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 function showError(message) {
     document.getElementById('step-verify').classList.remove('active');
+    document.getElementById('step-deploying').classList.remove('active');
     const errBox = document.getElementById('verifyError');
     errBox.innerText = "❌ " + message;
     errBox.style.display = 'block';
