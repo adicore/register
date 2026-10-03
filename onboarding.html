@@ -6,29 +6,18 @@
     <title>Setup Infrastruktur - SaaS CMS Dashboard</title>
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 90vh;}
-        .card { width: 100%; max-width: 550px; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .card { width: 100%; max-width: 500px; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         h2 { color: #333; text-align: center; margin-top: 0; }
         .text-center { text-align: center; }
         .step-container { display: none; }
         .step-container.active { display: block; animation: fadeIn 0.5s; }
         
-        .form-group { margin-bottom: 18px; }
-        label { display: block; margin-bottom: 6px; font-weight: bold; color: #444; font-size: 14px; }
-        input { width: 100%; padding: 11px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        input:focus { border-color: #ff6600; outline: none; }
-        
-        button { width: 100%; background: #007bff; color: white; border: none; padding: 14px; font-size: 16px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 15px;}
-        button:hover { background: #0056b3; }
-        button:disabled { background: #cccccc; cursor: not-allowed; }
-
         .loader { border: 4px solid #f3f3f3; border-top: 4px solid #ff6600; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
         .alert { padding: 15px; background: #d4edda; color: #155724; border-radius: 4px; margin-bottom: 20px; font-size: 14px; text-align: center; }
         .alert-error { background: #f8d7da; color: #721c24; }
-        .section-title { font-size: 15px; color: #ff6600; border-bottom: 1px solid #eee; padding-bottom: 4px; margin-top: 20px; margin-bottom: 12px; font-weight: bold; }
-        .note { font-size: 12px; color: #666; margin-top: 4px; display: block; }
     </style>
 </head>
 <body>
@@ -43,142 +32,86 @@
         <div id="verifyError" class="alert alert-error" style="display: none; margin-top: 20px;"></div>
     </div>
 
-    <!-- STEP 2: FORM CLOUDFLARE & GITHUB SETUP (OTOMATIS) -->
-    <div id="step-form" class="step-container">
-        <h2>Setup Infrastruktur Toko</h2>
-        <div class="alert">✅ Pembayaran Berhasil! Masukkan kredensial Cloudflare & GitHub Anda untuk memulai instalasi otomatis.</div>
-        
-        <form id="onboardingForm">
-            <div class="section-title">1. Konfigurasi Cloudflare</div>
-            <div class="form-group">
-                <label>Cloudflare Account ID:</label>
-                <input type="text" id="cfAccountId" required placeholder="Contoh: 1234abcd5678efgh...">
-            </div>
-            <div class="form-group">
-                <label>Cloudflare API Token:</label>
-                <input type="password" id="cfToken" required placeholder="Token dengan izin Workers, Pages, D1, KV, & DNS">
-                <span class="note">Digunakan untuk otomatis membuat Worker, Database D1, KV, Pages, dan DNS CNAME.</span>
-            </div>
-            <div class="form-group">
-                <label>Nama Worker Utama (Bebas):</label>
-                <input type="text" id="cfWorkerName" required placeholder="Contoh: toko-budi-cms">
-            </div>
-
-            <div class="section-title">2. Konfigurasi GitHub</div>
-            <div class="form-group">
-                <label>GitHub Personal Access Token (PAT):</label>
-                <input type="password" id="githubTokenInput" required placeholder="ghp_xxxxxxxxxxxx">
-                <span class="note">Digunakan untuk otomatis membuat Repo Private dan injeksi CI/CD Workflow.</span>
-            </div>
-            
-            <button type="submit" id="btnDeploy">🚀 Mulai Instalasi Otomatis Sekarang</button>
-        </form>
-    </div>
-
-    <!-- STEP 3: DEPLOYMENT LOADING -->
+    <!-- STEP 2: DEPLOYMENT LOADING OTOMATIS -->
     <div id="step-deploying" class="step-container text-center">
         <div class="loader" style="border-top-color: #007bff;"></div>
         <h2>Merakit Infrastruktur Secara Otomatis...</h2>
-        <p style="color: #666;">Sistem sedang membuat Worker, Database, KV, Repo GitHub, Injeksi CI/CD Workflow, serta Setting Domain. Mohon tunggu sebentar...</p>
-        <p style="font-size: 12px; color: #999;">(Anda akan otomatis diarahkan ke Dashboard setelah selesai)</p>
+        <div class="alert" style="margin-top: 15px;">✅ Pembayaran Berhasil! Sistem sedang membuat Worker, Database D1, KV, Repo GitHub Mandiri, Injeksi CI/CD Workflow, serta Setting Custom Domain di akun Cloudflare & GitHub Anda.</div>
+        <p style="color: #666; font-size: 14px;">Mohon jangan menutup halaman ini sampai proses selesai...</p>
     </div>
 
 </div>
 
 <script>
 const API_BASE = "https://dashboard-admin-pusat.accessed.workers.dev/api";
-let paypalOrderId = "";
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const urlParams = new URLSearchParams(window.location.search);
-    paypalOrderId = urlParams.get('token');
+    const paypalOrderId = urlParams.get('token');
 
     if (!paypalOrderId) {
-        document.getElementById('verifyError').innerText = "Akses tidak sah. Token pembayaran tidak ditemukan.";
-        document.getElementById('verifyError').style.display = 'block';
-        document.querySelector('.loader').style.display = 'none';
+        showError("Akses tidak sah. Token pembayaran tidak ditemukan.");
         return;
     }
-
-    fetch(`${API_BASE}/capture-payment`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ paypal_order_id: paypalOrderId })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            document.getElementById('step-verify').classList.remove('active');
-            document.getElementById('step-form').classList.add('active');
-        } else {
-            throw new Error(data.error || "Pembayaran gagal diverifikasi.");
-        }
-    })
-    .catch(err => {
-        document.getElementById('verifyError').innerText = err.message;
-        document.getElementById('verifyError').style.display = 'block';
-        document.querySelector('.loader').style.display = 'none';
-    });
-});
-
-document.getElementById('onboardingForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const savedDataStr = localStorage.getItem('travego_setup_data');
-    if (!savedDataStr) {
-        alert("Data sesi pendaftaran hilang. Silakan ulangi proses dari awal.");
-        return;
-    }
-    
-    const clientData = JSON.parse(savedDataStr);
-    
-    // Generate KV dan D1 ID otomatis via backend (atau placeholder acak yang valid di-generate otomatis oleh backend pusat)
-    const randomId = crypto.randomUUID().replace(/-/g, '');
-    const deployPayload = {
-        paypal_order_id: paypalOrderId,
-        name: clientData.name,
-        email: clientData.email,
-        password: clientData.password,
-        domain: clientData.domain,
-        dashboardVersion: clientData.product_version,
-        
-        accountId: document.getElementById('cfAccountId').value.trim(),
-        token: document.getElementById('cfToken').value.trim(),
-        workerName: document.getElementById('cfWorkerName').value.trim(),
-        
-        // Auto-generate ID untuk D1 & KV agar klien tidak perlu repot membuat manual
-        kvId: randomId.substring(0, 32),
-        databaseId: crypto.randomUUID(),
-
-        secrets: {
-            GITHUB_PAT: document.getElementById('githubTokenInput').value.trim()
-        }
-    };
-
-    document.getElementById('step-form').classList.remove('active');
-    document.getElementById('step-deploying').classList.add('active');
 
     try {
-        const response = await fetch(`${API_BASE}/deploy-client`, {
+        // 1. Capture Pembayaran PayPal
+        const captureRes = await fetch(`${API_BASE}/capture-payment`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ paypal_order_id: paypalOrderId })
+        });
+        const captureData = await captureRes.json();
+
+        if (!captureRes.ok || !captureData.success) {
+            throw new Error(captureData.error || "Pembayaran gagal diverifikasi.");
+        }
+
+        // 2. Ambil data setup klien yang disimpan sebelum ke PayPal
+        const savedDataStr = localStorage.getItem('travego_setup_data');
+        if (!savedDataStr) {
+            throw new Error("Data sesi pendaftaran hilang. Silakan ulangi proses dari awal.");
+        }
+
+        const clientData = JSON.parse(savedDataStr);
+        const deployPayload = {
+            paypal_order_id: paypalOrderId,
+            ...clientData
+        };
+
+        // Pindah tampilan ke status deploying
+        document.getElementById('step-verify').classList.remove('active');
+        document.getElementById('step-deploying').classList.add('active');
+
+        // 3. Panggil API Deploy Otomatis (BYOK)
+        const deployRes = await fetch(`${API_BASE}/deploy-client`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(deployPayload)
         });
         
-        const result = await response.json();
+        const deployResult = await deployRes.json();
         
-        if (response.ok && result.success && result.magic_url) {
+        if (deployRes.ok && deployResult.success && deployResult.magic_url) {
             localStorage.removeItem('travego_setup_data');
-            window.location.href = result.magic_url;
+            // Redirect otomatis ke Magic Link Dasbor Klien
+            window.location.href = deployResult.magic_url;
         } else {
-            throw new Error(result.error || "Gagal membangun infrastruktur otomatis.");
+            throw new Error(deployResult.error || "Gagal membangun infrastruktur otomatis.");
         }
+
     } catch (err) {
-        alert("❌ Deployment Gagal: " + err.message + "\n\nSilakan coba lagi.");
-        document.getElementById('step-deploying').classList.remove('active');
-        document.getElementById('step-form').classList.add('active');
+        showError(err.message);
     }
 });
+
+function showError(message) {
+    document.getElementById('step-verify').classList.remove('active');
+    const errBox = document.getElementById('verifyError');
+    errBox.innerText = "❌ " + message;
+    errBox.style.display = 'block';
+    document.querySelector('.loader').style.display = 'none';
+}
 </script>
 </body>
 </html>
