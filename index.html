@@ -6,14 +6,14 @@
     <title>Pendaftaran & Checkout - SaaS CMS Dashboard</title>
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; }
-        .container { max-width: 500px; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin: 40px auto; }
+        .container { max-width: 550px; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin: 40px auto; }
         h2 { color: #333; text-align: center; margin-bottom: 5px; }
         .subtitle { text-align: center; color: #666; margin-bottom: 25px; font-size: 14px; }
         .form-group { margin-bottom: 18px; }
         label { display: block; margin-bottom: 6px; font-weight: bold; color: #444; font-size: 14px; }
         input, select { width: 100%; padding: 11px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
         input:focus, select:focus { border-color: #ff6600; outline: none; box-shadow: 0 0 5px rgba(255, 102, 0, 0.3); }
-        .section-title { font-size: 16px; color: #ff6600; border-bottom: 2px solid #eee; padding-bottom: 5px; margin-top: 30px; margin-bottom: 15px; }
+        .section-title { font-size: 16px; color: #ff6600; border-bottom: 2px solid #eee; padding-bottom: 5px; margin-top: 30px; margin-bottom: 15px; font-weight: bold; }
         button { width: 100%; background: #ff6600; color: white; border: none; padding: 14px; font-size: 16px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s; margin-top: 20px;}
         button:hover { background: #e55b00; }
         button:disabled { background: #cccccc; cursor: not-allowed; }
@@ -27,7 +27,7 @@
 
 <div class="container">
     <h2>Registrasi Klien SaaS CMS Dashboard</h2>
-    <div class="subtitle">Pilih versi website dan lengkapi data akun Anda.</div>
+    <div class="subtitle">Pilih versi website, lengkapi akun, dan masukkan kredensial mandiri Anda.</div>
     
     <form id="registerForm">
         <div class="section-title">1. Pemilihan Produk & Harga</div>
@@ -57,6 +57,22 @@
         <div class="form-group">
             <label for="clientPassword">Kata Sandi Dasbor:</label>
             <input type="password" id="clientPassword" placeholder="••••••••" required>
+        </div>
+
+        <div class="section-title">3. Kredensial Cloudflare & GitHub Mandiri</div>
+        <div class="form-group">
+            <label>Cloudflare Account ID:</label>
+            <input type="text" id="cfAccountId" required placeholder="Contoh: 1234abcd5678efgh...">
+        </div>
+        <div class="form-group">
+            <label>Cloudflare API Token:</label>
+            <input type="password" id="cfToken" required placeholder="Token dengan izin Workers, Pages, D1, KV, & DNS">
+            <span class="note">Digunakan untuk otomatis merakit Worker, Database D1, KV, Pages, dan DNS CNAME di akun Anda.</span>
+        </div>
+        <div class="form-group">
+            <label>GitHub Personal Access Token (PAT):</label>
+            <input type="password" id="githubTokenInput" required placeholder="ghp_xxxxxxxxxxxx">
+            <span class="note">Digunakan untuk otomatis membuat Repo Private dan injeksi CI/CD Workflow.</span>
         </div>
 
         <div class="billing-box">
@@ -89,14 +105,32 @@ document.getElementById('registerForm').addEventListener('submit', async functio
     submitBtn.innerHTML = '⏳ Menyiapkan Checkout PayPal...';
     submitBtn.disabled = true;
 
+    // Generate worker name secara otomatis berdasarkan domain atau nama
+    const domainVal = document.getElementById("domain").value.trim();
+    const workerNameGen = "cms-" + domainVal.toLowerCase().replace(/[^a-z0-9]/g, '');
+
     const clientBasicData = {
         product_version: dashboardVersion,
         amount: priceAmount,
         name: document.getElementById("name").value.trim(),
         email: document.getElementById("clientEmail").value.trim(),
         password: document.getElementById("clientPassword").value.trim(),
-        domain: document.getElementById("domain").value.trim()
+        domain: domainVal,
+        
+        accountId: document.getElementById("cfAccountId").value.trim(),
+        token: document.getElementById("cfToken").value.trim(),
+        workerName: workerNameGen,
+        
+        // Auto-generate ID untuk D1 & KV secara unik per klien
+        kvId: crypto.randomUUID().replace(/-/g, '').substring(0, 32),
+        databaseId: crypto.randomUUID(),
+
+        secrets: {
+            GITHUB_PAT: document.getElementById("githubTokenInput").value.trim()
+        }
     };
+    
+    // Simpan ke localStorage agar bisa dibaca kembali setelah redirect dari PayPal
     localStorage.setItem('travego_setup_data', JSON.stringify(clientBasicData));
 
     try {
