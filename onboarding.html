@@ -28,6 +28,7 @@
         .alert { padding: 15px; background: #d4edda; color: #155724; border-radius: 4px; margin-bottom: 20px; font-size: 14px; text-align: center; }
         .alert-error { background: #f8d7da; color: #721c24; }
         .section-title { font-size: 15px; color: #ff6600; border-bottom: 1px solid #eee; padding-bottom: 4px; margin-top: 20px; margin-bottom: 12px; font-weight: bold; }
+        .note { font-size: 12px; color: #666; margin-top: 4px; display: block; }
     </style>
 </head>
 <body>
@@ -42,53 +43,43 @@
         <div id="verifyError" class="alert alert-error" style="display: none; margin-top: 20px;"></div>
     </div>
 
-    <!-- STEP 2: FORM CLOUDFLARE & GITHUB SETUP -->
+    <!-- STEP 2: FORM CLOUDFLARE & GITHUB SETUP (OTOMATIS) -->
     <div id="step-form" class="step-container">
         <h2>Setup Infrastruktur Toko</h2>
-        <div class="alert">✅ Pembayaran Berhasil! Langkah terakhir: Hubungkan Cloudflare & GitHub Anda.</div>
+        <div class="alert">✅ Pembayaran Berhasil! Masukkan kredensial Cloudflare & GitHub Anda untuk memulai instalasi otomatis.</div>
         
         <form id="onboardingForm">
-            <div class="section-title">Konfigurasi Cloudflare</div>
+            <div class="section-title">1. Konfigurasi Cloudflare</div>
             <div class="form-group">
                 <label>Cloudflare Account ID:</label>
                 <input type="text" id="cfAccountId" required placeholder="Contoh: 1234abcd5678efgh...">
             </div>
             <div class="form-group">
                 <label>Cloudflare API Token:</label>
-                <input type="password" id="cfToken" required placeholder="Token dengan akses Edit Workers & D1">
+                <input type="password" id="cfToken" required placeholder="Token dengan izin Workers, Pages, D1, KV, & DNS">
+                <span class="note">Digunakan untuk otomatis membuat Worker, Database D1, KV, Pages, dan DNS CNAME.</span>
             </div>
             <div class="form-group">
-                <label>Nama Worker Baru (Bebas):</label>
+                <label>Nama Worker Utama (Bebas):</label>
                 <input type="text" id="cfWorkerName" required placeholder="Contoh: toko-budi-cms">
             </div>
-            <div class="form-group">
-                <label>KV Namespace ID:</label>
-                <input type="text" id="cfKvId" required placeholder="ID KV Namespace Anda">
-            </div>
-            <div class="form-group">
-                <label>D1 Database ID:</label>
-                <input type="text" id="cfD1Id" required placeholder="ID Database D1 Anda">
-            </div>
 
-            <div class="section-title">Konfigurasi GitHub (Untuk CI/CD Pages)</div>
+            <div class="section-title">2. Konfigurasi GitHub</div>
             <div class="form-group">
                 <label>GitHub Personal Access Token (PAT):</label>
-                <input type="password" id="githubTokenInput" placeholder="ghp_xxxxxxxxxxxx">
-            </div>
-            <div class="form-group">
-                <label>Nama Repository GitHub:</label>
-                <input type="text" id="githubRepoInput" placeholder="username/repository">
+                <input type="password" id="githubTokenInput" required placeholder="ghp_xxxxxxxxxxxx">
+                <span class="note">Digunakan untuk otomatis membuat Repo Private dan injeksi CI/CD Workflow.</span>
             </div>
             
-            <button type="submit" id="btnDeploy">🚀 Deploy Dashboard Saya Sekarang</button>
+            <button type="submit" id="btnDeploy">🚀 Mulai Instalasi Otomatis Sekarang</button>
         </form>
     </div>
 
     <!-- STEP 3: DEPLOYMENT LOADING -->
     <div id="step-deploying" class="step-container text-center">
         <div class="loader" style="border-top-color: #007bff;"></div>
-        <h2>Membangun Sistem Anda...</h2>
-        <p style="color: #666;">Sedang mengunggah sistem CMS dan menyuntikkan database ke akun Cloudflare Anda. Proses ini memakan waktu sekitar 10-20 detik.</p>
+        <h2>Merakit Infrastruktur Secara Otomatis...</h2>
+        <p style="color: #666;">Sistem sedang membuat Worker, Database, KV, Repo GitHub, Injeksi CI/CD Workflow, serta Setting Domain. Mohon tunggu sebentar...</p>
         <p style="font-size: 12px; color: #999;">(Anda akan otomatis diarahkan ke Dashboard setelah selesai)</p>
     </div>
 
@@ -99,7 +90,6 @@ const API_BASE = "https://dashboard-admin-pusat.accessed.workers.dev/api";
 let paypalOrderId = "";
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Ambil Order ID dari URL (Sistem redirect PayPal)
     const urlParams = new URLSearchParams(window.location.search);
     paypalOrderId = urlParams.get('token');
 
@@ -110,19 +100,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // 1.5 Ambil data yang sempat disimpan di LocalStorage (jika ada) untuk mengisi otomatis input GitHub
-    const savedDataStr = localStorage.getItem('travego_setup_data');
-    if (savedDataStr) {
-        try {
-            const parsed = JSON.parse(savedDataStr);
-            if (parsed.secrets) {
-                if (parsed.secrets.GITHUB_TOKEN) document.getElementById('githubTokenInput').value = parsed.secrets.GITHUB_TOKEN;
-                if (parsed.secrets.GITHUB_REPO) document.getElementById('githubRepoInput').value = parsed.secrets.GITHUB_REPO;
-            }
-        } catch(e) {}
-    }
-
-    // 2. Tembak API Capture Payment
     fetch(`${API_BASE}/capture-payment`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -131,7 +108,6 @@ document.addEventListener('DOMContentLoaded', () => {
     .then(res => res.json())
     .then(data => {
         if (data.success) {
-            // Lanjut ke form setup
             document.getElementById('step-verify').classList.remove('active');
             document.getElementById('step-form').classList.add('active');
         } else {
@@ -145,20 +121,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// 3. Handle Submit Form Deploy
 document.getElementById('onboardingForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    // Ambil data user dari LocalStorage
     const savedDataStr = localStorage.getItem('travego_setup_data');
     if (!savedDataStr) {
-        alert("Data sesi pendaftaran hilang. Pastikan Anda mendaftar melalui halaman resmi.");
+        alert("Data sesi pendaftaran hilang. Silakan ulangi proses dari awal.");
         return;
     }
     
     const clientData = JSON.parse(savedDataStr);
     
-    // Gabungkan data profil dengan data Cloudflare & GitHub dari form onboarding ini
+    // Generate KV dan D1 ID otomatis via backend (atau placeholder acak yang valid di-generate otomatis oleh backend pusat)
+    const randomId = crypto.randomUUID().replace(/-/g, '');
     const deployPayload = {
         paypal_order_id: paypalOrderId,
         name: clientData.name,
@@ -170,16 +145,16 @@ document.getElementById('onboardingForm').addEventListener('submit', async (e) =
         accountId: document.getElementById('cfAccountId').value.trim(),
         token: document.getElementById('cfToken').value.trim(),
         workerName: document.getElementById('cfWorkerName').value.trim(),
-        kvId: document.getElementById('cfKvId').value.trim(),
-        databaseId: document.getElementById('cfD1Id').value.trim(),
+        
+        // Auto-generate ID untuk D1 & KV agar klien tidak perlu repot membuat manual
+        kvId: randomId.substring(0, 32),
+        databaseId: crypto.randomUUID(),
 
         secrets: {
-            GITHUB_TOKEN: document.getElementById('githubTokenInput').value.trim() || (clientData.secrets ? clientData.secrets.GITHUB_TOKEN : ""),
-            GITHUB_REPO: document.getElementById('githubRepoInput').value.trim() || (clientData.secrets ? clientData.secrets.GITHUB_REPO : "")
+            GITHUB_PAT: document.getElementById('githubTokenInput').value.trim()
         }
     };
 
-    // Pindah UI ke status Deploying
     document.getElementById('step-form').classList.remove('active');
     document.getElementById('step-deploying').classList.add('active');
 
@@ -193,17 +168,13 @@ document.getElementById('onboardingForm').addEventListener('submit', async (e) =
         const result = await response.json();
         
         if (response.ok && result.success && result.magic_url) {
-            // Bersihkan local storage demi keamanan
             localStorage.removeItem('travego_setup_data');
-            
-            // REDIRECT OTOMATIS (Bypass Login)
             window.location.href = result.magic_url;
         } else {
-            throw new Error(result.error || "Gagal membangun infrastruktur.");
+            throw new Error(result.error || "Gagal membangun infrastruktur otomatis.");
         }
     } catch (err) {
-        alert("❌ Deployment Gagal: " + err.message + "\n\nSilakan refresh halaman ini untuk mencoba lagi.");
-        // Kembalikan ke UI Form
+        alert("❌ Deployment Gagal: " + err.message + "\n\nSilakan coba lagi.");
         document.getElementById('step-deploying').classList.remove('active');
         document.getElementById('step-form').classList.add('active');
     }
