@@ -60,12 +60,7 @@
         </div>
 
         <div class="section-title">3. Kredensial Cloudflare & GitHub Mandiri</div>
-        <div class="form-group">
-            <label>Cloudflare Account ID:</label>
-            <input type="text" id="cfAccountId" required placeholder="Contoh: 1234abcd5678efgh...">
-        </div>
-        
-        <!-- BAGIAN YANG DIUBAH: Email dan Global Key untuk Auto-Token -->
+        <!-- Kolom Account ID Dihapus karena diambil otomatis oleh sistem -->
         <div class="form-group">
             <label for="cfEmail">Email Akun Cloudflare:</label>
             <input type="email" id="cfEmail" class="form-control" placeholder="email@domain.com" required>
@@ -75,10 +70,9 @@
             <input type="password" id="cfGlobalKey" class="form-control" placeholder="Tempelkan Global API Key di sini" required>
             <span class="note">
                 Lihat di dasbor Cloudflare: <strong>Profil > API Tokens > Global API Key (View)</strong>. <br>
-                Sistem akan otomatis membuat token spesifik terbatas, dan tidak akan menyimpan Global Key Anda.
+                Sistem akan otomatis mendeteksi Account ID dan membuat token spesifik terbatas secara aman.
             </span>
         </div>
-        <!-- AKHIR BAGIAN YANG DIUBAH -->
 
         <div class="form-group">
             <label>GitHub Personal Access Token (PAT):</label>
@@ -127,7 +121,6 @@ document.getElementById('registerForm').addEventListener('submit', async functio
         password: document.getElementById("clientPassword").value.trim(),
         domain: domainVal,
         
-        accountId: document.getElementById("cfAccountId").value.trim(),
         cloudflare_email: document.getElementById("cfEmail").value.trim(),
         global_api_key: document.getElementById("cfGlobalKey").value.trim(),
         token: "", // Diisi otomatis oleh backend worker pusat
