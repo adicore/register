@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Setup Infrastruktur Selesai - SaaS CMS Dashboard</title>
+    <title>Setup Infrastruktur - SaaS CMS Dashboard</title>
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 90vh;}
         .card { width: 100%; max-width: 550px; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
@@ -23,6 +23,8 @@
         .info-item { margin-bottom: 12px; font-size: 14px; color: #333; word-break: break-all; }
         .info-item strong { color: #555; display: inline-block; width: 130px; }
         
+        .error-log-box { background: #222; color: #ff6b6b; font-family: monospace; font-size: 12px; padding: 12px; border-radius: 6px; text-align: left; max-height: 150px; overflow-y: auto; margin-top: 15px; display: none; }
+        
         .btn-primary { display: block; width: 100%; background: #ff6600; color: white; text-align: center; text-decoration: none; padding: 14px; font-size: 16px; border-radius: 4px; font-weight: bold; box-sizing: border-box; margin-top: 20px; }
         .btn-primary:hover { background: #e55b00; }
     </style>
@@ -39,12 +41,13 @@
         <div id="verifyError" class="alert alert-error" style="display: none; margin-top: 20px;"></div>
     </div>
 
-    <!-- STEP 2: DEPLOYMENT LOADING OTOMATIS -->
+    <!-- STEP 2: DEPLOYMENT LOADING OTOMATIS (GitHub Actions Polling) -->
     <div id="step-deploying" class="step-container text-center">
         <div class="loader" style="border-top-color: #007bff;"></div>
         <h2>Merakit Infrastruktur Secara Otomatis...</h2>
         <div class="alert" style="margin-top: 15px;">⏳ Pembayaran Berhasil! Sistem sedang merakit Worker, Database D1, KV, Repo GitHub, Injeksi Workflow CI/CD, serta Konfigurasi Custom Domain Anda.</div>
-        <p style="color: #666; font-size: 14px;">Mohon jangan menutup halaman ini sampai proses selesai...</p>
+        <p id="deployProgressText" style="color: #666; font-size: 14px;">Menjalankan proses build di GitHub Actions... (0 detik)</p>
+        <div id="deployErrorLog" class="error-log-box"></div>
     </div>
 
     <!-- STEP 3: HALAMAN SUKSES (SUCCESS PAGE) -->
@@ -90,7 +93,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             throw new Error(captureData.error || "Pembayaran gagal diverifikasi.");
         }
 
-        // 2. Ambil data setup klien yang disimpan sebelum ke PayPal
+        // 2. Ambil data setup klien dari localStorage
         const savedDataStr = localStorage.getItem('travego_setup_data');
         if (!savedDataStr) {
             throw new Error("Data sesi pendaftaran hilang. Silakan ulangi proses dari awal.");
@@ -106,7 +109,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('step-verify').classList.remove('active');
         document.getElementById('step-deploying').classList.add('active');
 
-        // 3. Panggil API Deploy Otomatis
+        // 3. Panggil API Trigger Deploy ke GitHub Actions
         const deployRes = await fetch(`${API_BASE}/deploy-client`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -115,28 +118,73 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         const deployResult = await deployRes.json();
         
-        if (deployRes.ok && deployResult.success && deployResult.magic_url) {
-            localStorage.removeItem('travego_setup_data');
-            
-            // Tampilkan halaman sukses alih-alih redirect otomatis
-            document.getElementById('step-deploying').classList.remove('active');
-            document.getElementById('step-success').classList.add('active');
-
-            document.getElementById('lblEmail').innerText = clientData.email;
-            const domainUrl = `https://${deployResult.admin_domain}`;
-            const domainLink = document.getElementById('lblDomain');
-            domainLink.innerText = deployResult.admin_domain;
-            domainLink.href = domainUrl;
-
-            document.getElementById('btnMagicLogin').href = deployResult.magic_url;
+        if (deployRes.ok && deployResult.success) {
+            // 4. MULAI POLLING STATUS BUILD GITHUB ACTIONS
+            pollDeploymentStatus(
+                clientData.workerName, 
+                deployResult.magic_url, 
+                deployResult.admin_domain, 
+                clientData.email
+            );
         } else {
-            throw new Error(deployResult.error || "Gagal membangun infrastruktur otomatis.");
+            throw new Error(deployResult.error || "Gagal memicu perakitan infrastruktur otomatis.");
         }
 
     } catch (err) {
         showError(err.message);
     }
 });
+
+function pollDeploymentStatus(workerName, magicUrl, adminDomain, email) {
+    let elapsedSeconds = 0;
+    const progressText = document.getElementById('deployProgressText');
+
+    const interval = setInterval(async () => {
+        elapsedSeconds += 4;
+        progressText.innerText = `Sedang merakit infrastruktur Cloudflare & GitHub Actions... (${elapsedSeconds} detik)`;
+
+        try {
+            const statusRes = await fetch(`${API_BASE}/deployment-status?worker_name=${workerName}`);
+            const statusData = await statusRes.json();
+
+            if (statusData.status === 'active') {
+                clearInterval(interval);
+                showSuccessStep(magicUrl, adminDomain, email);
+            } else if (statusData.status === 'failed') {
+                clearInterval(interval);
+                showDeploymentFailure(statusData.error || "GitHub Actions melaporkan kegagalan proses build.");
+            }
+        } catch (e) {
+            console.error("Kesalahan koneksi saat polling status deployment:", e);
+        }
+    }, 4000); // Cek status setiap 4 detik
+}
+
+function showSuccessStep(magicUrl, adminDomain, email) {
+    localStorage.removeItem('travego_setup_data');
+
+    document.getElementById('step-deploying').classList.remove('active');
+    document.getElementById('step-success').classList.add('active');
+
+    document.getElementById('lblEmail').innerText = email;
+    const domainUrl = `https://${adminDomain}`;
+    const domainLink = document.getElementById('lblDomain');
+    domainLink.innerText = adminDomain;
+    domainLink.href = domainUrl;
+
+    document.getElementById('btnMagicLogin').href = magicUrl;
+}
+
+function showDeploymentFailure(errorMsg) {
+    document.getElementById('step-deploying').querySelector('.loader').style.display = 'none';
+    const progressText = document.getElementById('deployProgressText');
+    progressText.innerText = "❌ Terjadi Kesalahan Pada Proses Deployment";
+    progressText.style.color = "#d9534f";
+
+    const errLogBox = document.getElementById('deployErrorLog');
+    errLogBox.innerText = errorMsg;
+    errLogBox.style.display = 'block';
+}
 
 function showError(message) {
     document.getElementById('step-verify').classList.remove('active');
