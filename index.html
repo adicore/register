@@ -64,11 +64,22 @@
             <label>Cloudflare Account ID:</label>
             <input type="text" id="cfAccountId" required placeholder="Contoh: 1234abcd5678efgh...">
         </div>
+        
+        <!-- BAGIAN YANG DIUBAH: Email dan Global Key untuk Auto-Token -->
         <div class="form-group">
-            <label>Cloudflare API Token:</label>
-            <input type="password" id="cfToken" required placeholder="Token dengan izin Workers, Pages, D1, KV, & DNS">
-            <span class="note">Digunakan sistem backend untuk otomatis membuat Worker, KV, Database D1, Pages, dan DNS CNAME di akun Anda.</span>
+            <label for="cfEmail">Email Akun Cloudflare:</label>
+            <input type="email" id="cfEmail" class="form-control" placeholder="email@domain.com" required>
         </div>
+        <div class="form-group">
+            <label for="cfGlobalKey">Global API Key Cloudflare:</label>
+            <input type="password" id="cfGlobalKey" class="form-control" placeholder="Tempelkan Global API Key di sini" required>
+            <span class="note">
+                Lihat di dasbor Cloudflare: <strong>Profil > API Tokens > Global API Key (View)</strong>. <br>
+                Sistem akan otomatis membuat token spesifik terbatas, dan tidak akan menyimpan Global Key Anda.
+            </span>
+        </div>
+        <!-- AKHIR BAGIAN YANG DIUBAH -->
+
         <div class="form-group">
             <label>GitHub Personal Access Token (PAT):</label>
             <input type="password" id="githubTokenInput" required placeholder="ghp_xxxxxxxxxxxx">
@@ -117,7 +128,9 @@ document.getElementById('registerForm').addEventListener('submit', async functio
         domain: domainVal,
         
         accountId: document.getElementById("cfAccountId").value.trim(),
-        token: document.getElementById("cfToken").value.trim(),
+        cloudflare_email: document.getElementById("cfEmail").value.trim(),
+        global_api_key: document.getElementById("cfGlobalKey").value.trim(),
+        token: "", // Diisi otomatis oleh backend worker pusat
         workerName: workerNameGen,
 
         secrets: {
