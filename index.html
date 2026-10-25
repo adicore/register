@@ -116,7 +116,7 @@
 </div>
 
 <script>
-const PUSAT_API_BASE = "https://dashboard-admin-pusat.accessed.workers.dev";
+const PUSAT_API_BASE = "https://dashboard-admin-pusat.accessed.workers.dev/api";
 
 function updatePrice() {
     const select = document.getElementById("dashboardVersion");
@@ -161,7 +161,7 @@ document.getElementById('registerForm').addEventListener('submit', async functio
     localStorage.setItem('travego_setup_data', JSON.stringify(clientBasicData));
 
     try {
-        const response = await fetch(`${PUSAT_API_BASE}/api/create-checkout`, {
+        const response = await fetch(`${PUSAT_API_BASE}/create-checkout`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(clientBasicData)
@@ -186,7 +186,7 @@ document.getElementById('registerForm').addEventListener('submit', async functio
 // Penanganan otomatis saat kembali dari PayPal (Return URL Detection & Polling)
 window.addEventListener('DOMContentLoaded', async () => {
     const urlParams = new URLSearchParams(window.location.search);
-    const tokenParam = urlParams.get('token'); // PayPal Order ID token
+    const tokenParam = urlParams.get('token'); // PayPal Order ID
     const savedDataStr = localStorage.getItem('travego_setup_data');
 
     if (tokenParam && savedDataStr) {
@@ -197,7 +197,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
         try {
             // 1. Tangkap Pembayaran PayPal
-            const captureRes = await fetch(`${PUSAT_API_BASE}/api/capture-payment`, {
+            const captureRes = await fetch(`${PUSAT_API_BASE}/capture-payment`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ paypal_order_id: tokenParam })
@@ -210,7 +210,7 @@ window.addEventListener('DOMContentLoaded', async () => {
             }
 
             // 2. Trigger Onboarding ke GitHub Actions
-            const deployRes = await fetch(`${PUSAT_API_BASE}/api/register-client`, {
+            const deployRes = await fetch(`${PUSAT_API_BASE}/register-client`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(setupData)
@@ -238,7 +238,7 @@ function startDeploymentPolling(workerName, magicUrl) {
     const pollInterval = setInterval(async () => {
         checkCount++;
         try {
-            const res = await fetch(`${PUSAT_API_BASE}/api/deployment-status?worker_name=${workerName}`);
+            const res = await fetch(`${PUSAT_API_BASE}/deployment-status?worker_name=${workerName}`);
             const data = await res.json();
 
             if (data.status === 'active') {
