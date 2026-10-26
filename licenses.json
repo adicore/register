@@ -1,9 +1,16 @@
 {
-  "updated_at": "2026-10-26T01:20:27.632Z",
+  "updated_at": "2026-10-26T08:46:05.686Z",
   "active_tokens": [
     "5245e22dea03daa8dc99523f9b62176b4f68ece59eee22d38fd9d20493fe3db5",
     "f649bb39154db8e1bc167d55d3a4fa1e294a1ffe83d9f87e61a72a5fcaab9400",
-    "5eb970fed04ba8b07ad42eb525fc488d40dd401d8e9912128172328de7f076d9"
+    "5eb970fed04ba8b07ad42eb525fc488d40dd401d8e9912128172328de7f076d9",
+    "06ffc42870d36dc45a71224f2bf936f1982916e0a692a0075d4076c9867bac84"
+  ],
+  "active_domains": [
+    "fixtrips.com",
+    "vacaytion.click",
+    "vacation.web.id",
+    "travego.web.id"
   ],
   "blocked_domains": []
 }
