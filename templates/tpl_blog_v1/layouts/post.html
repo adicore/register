@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta content='{{META_ROBOTS}}' name='robots' />
+    <link href='{{CANONICAL_URL}}' rel='canonical' />
+    <link href='{{CANONICAL_URL}}' rel='alternate' />
+    <meta content='{{CANONICAL_URL}}' property='og:url' />
+    <meta content='{{CANONICAL_URL}}' name='twitter:url' />
+    <meta content='{{SITE_URL}}' name='twitter:domain' />
+    <meta content='website' property='og:type' />
+    <meta content='en' property='og:locale' />
+    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+    <meta content='IE=edge' http-equiv='X-UA-Compatible' />
+    <meta charset='utf-8' />
+    <meta content='width=device-width, initial-scale=1.0, maximum-scale=5' name='viewport' />
+    <meta content='summary_large_image' name='twitter:card' />
+    <meta content='{{POST_DESCRIPTION}}' name='twitter:description' />
+    <meta content='{{POST_DESCRIPTION}}' name='description' />
+    <meta content='{{POST_DESCRIPTION}}' property='og:description' />
+    <meta content='1200' property='og:image:width' />
+    <meta content='630' property='og:image:height' />
+    <meta content='{{SITE_TITLE}}' property='og:site_name' />
+    <meta content='en' name='geo.country' />
+    <meta content='{{META_IMAGE}}' name='twitter:image' />
+    <meta content='{{META_IMAGE}}' property='og:image' />
+    <script type='application/ld+json'>
+        {
+            "@context": "http://schema.org",
+            "@type": "Organization",
+            "url": "{{CANONICAL_URL}}",
+            "logo": "{{LOGO_URL}}"
+        }
+    </script>
+    <script id='ldjson' type='application/ld+json'>
+        {
+            "@context": "http://schema.org",
+            "@type": "Website",
+            "name": "{{SITE_TITLE}}",
+            "url": "{{CANONICAL_URL}}",
+            "potentialAction": {
+                "@type": "SearchAction",
+                "target": "{{SITE_URL}}?search?q={search_term_string}",
+                "query-input": "required name=search_term_string"
+            }
+        }
+    </script>
+    <title>{{POST_TITLE}} {{TITLE_SEPARATOR}} {{SITE_TITLE}}</title>
+    <meta content='{{POST_TITLE}}' property='og:image:alt' />
+    <meta content='{{POST_TITLE}}' property='og:title' />
+    <meta content='{{POST_TITLE}}' name='twitter:title' />
+    <meta content='{{POST_TITLE}}' name='twitter:image:alt' />
+    {{GOOGLE_VERIFY}}{{BING_VERIFY}}{{YANDEX_VERIFY}}
+    <meta content='https://www.facebook.com/' property='article:publisher' />
+    <meta content='https://www.facebook.com/' property='article:author' />
+    <meta content='' property='fb:pages' />
+    <meta content='' name='twitter:site' />
+    <meta content='' name='twitter:creator' />
+    <meta content='' property='fb:app_id' />
+    <meta content='' property='fb:admins' />
+    <script id='ldjson2' type='application/ld+json'>
+        {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "{{SITE_TITLE}}",
+            "url": "{{CANONICAL_URL}}",
+            "sameAs": ["{{SOCIAL_FACEBOOK}}", "{{SOCIAL_TWITTER}}", "{{SOCIAL_INSTAGRAM}}", "{{SOCIAL_LINKEDIN}}", "{{SOCIAL_TIKTOK}}", "{{SOCIAL_YOUTUBE}}"]
+        }
+    </script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org/",
+            "@type": "Person",
+            "name": "{{AUTHOR_NAME}}",
+            "url": "{{SITE_URL}}",
+            "image": "{{AUTHOR_AVATAR}}"
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" fetchpriority="high">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin fetchpriority="high">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900&display=swap" rel="stylesheet" fetchpriority="high">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" fetchpriority="high">
+    <link rel="stylesheet" href="../assets/css/bootstrap-icons.min.css" fetchpriority="low">
+    <script delay="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.3.2/lazysizes.min.js" async fetchpriority="low"></script>
+    <link rel="stylesheet" href="../assets/css/style.css" fetchpriority="high">
+</head>
+
+<body id="{{BODY_ID}}" class="bg-light">
+    <header class="bg-white sticky-top shadow-sm"> {{HEADER_TOPBAR}} {{HEADER_NAV}}
+        <script type="application/ld+json">
+            {
+                "@context": "https://schema.org/",
+                "@type": "BreadcrumbList",
+                "itemListElement": [{
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": "Homepage",
+                    "item": "{{SITE_URL}}"
+                }, {
+                    "@type": "ListItem",
+                    "position": 2,
+                    "name": "{{POST_TITLE}}",
+                    "item": "{{CANONICAL_URL}}"
+                }]
+            }
+        </script>
+    </header>
+    <div class="container my-3">
+        <div class="bg-white border rounded-4 p-3 text-center shadow-sm"><span class="badge bg-secondary bg-opacity-10 text-secondary mb-1 px-2 py-1 rounded small" style="font-size: 0.7rem;">Ad</span>
+            <div class="py-2 bg-light rounded text-muted fw-semibold"> 📢 {{TOP_POST_AD}}</div>
+        </div>
+    </div>
+
+    <main class="container mb-5">
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <article class="bg-white border rounded-4 p-4 p-lg-5 shadow-sm">
+                    <div class="mb-3">
+                        <a href="/category/{{POST_CATEGORY_SLUG}}"><span class="badge bg-primary bg-opacity-10 text-primary px-3 py-1.5 rounded-pill fw-semibold">{{POST_CATEGORY}}</span></a>
+                    </div>
+                    <h1 class="fw-bold text-dark display-6 mb-3">{{POST_TITLE}}</h1>
+                    <div class="d-flex flex-wrap align-items-center justify-content-between border-top border-bottom py-3 mb-4 text-muted small gap-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="{{AUTHOR_AVATAR}}" alt="{{AUTHOR_NAME}}" class="rounded-circle lazyload lazy-effect" width="40" height="40" style="object-fit: cover;">
+                            <div>
+                                <h6 class="fw-bold text-dark mb-0">{{AUTHOR_NAME}}</h6>
+                                <span class="text-muted" style="font-size: 0.8rem;">{{AUTHOR_ROLE}}</span>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            <span><i class="bi bi-calendar3 me-1"></i>{{POST_DATE}}</span>
+                            <span><i class="bi bi-clock me-1"></i><span id="reading-time">Load...</span></span>
+                            <span><i class="bi bi-chat-square-text me-1"></i><a href="#disqus_thread" data-disqus-identifier="article-{{POST_TITLE}}">0 Comments</a></span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2 mb-4 p-2 bg-light rounded-3 border justify-content-center flex-wrap">
+                        <span class="small fw-bold text-secondary px-2"><i class="bi bi-share-fill me-1"></i>Share:</span>
+                        <a target='_blank' rel='nofollow' href="https://www.facebook.com/sharer.php?u={{CANONICAL_URL}}" class="btn btn-sm btn-outline-primary rounded-pill px-3"><i class="bi bi-facebook me-1"></i>Facebook</a>
+                        <a target='_blank' rel='nofollow' href="https://x.com/intent/tweet?url={{CANONICAL_URL}}?spref%3Dtw&text={{SITE_TITLE}}:{{POST_TITLE}}" class="btn btn-sm btn-outline-info rounded-pill px-3 text-dark"><i class="bi bi-twitter-x me-1"></i>Twitter</a>
+                        <a target='_blank' rel='nofollow' href="https://wa.me?text={{POST_TITLE}}%20%2D%20{{CANONICAL_URL}}" class="btn btn-sm btn-outline-success rounded-pill px-3"><i class="bi bi-whatsapp me-1"></i>WhatsApp</a>
+                        <a rel='nofollow' href="{{CANONICAL_URL}}" class="btn btn-sm btn-outline-secondary rounded-pill px-3"><i class="bi bi-link-45deg me-1"></i>Copy Link</a>
+                    </div>
+
+                    <div class="mb-4">
+                        <img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="{{POST_THUMBNAIL}}" alt="{{POST_TITLE}}" class="img-fluid rounded-4 shadow-sm w-100 lazyload lazy-effect" style="max-height: 450px; object-fit: cover;" height="466" width="350">
+                    </div>
+
+                    <div class="toc-box p-4 rounded-3 mb-4 shadow-sm">
+                        <h5 class="fw-bold text-dark mb-3"><i class="bi bi-list-nested text-primary me-2"></i>Table of Contents (Toc)</h5>
+                        <ul class="list-unstyled mb-0 ps-2"></ul>
+                    </div>
+
+                    {{dynamic_json_ld}}
+
+                    <div class="article-content">
+                        {{POST_CONTENT}}
+                    </div>
+
+                    <div class="d-flex flex-wrap align-items-center justify-content-between border-top pt-4 mt-5 gap-2">
+                        <div class="d-block align-items-center gap-2">
+                            <span class="fw-bold text-secondary small">Label:</span>
+                            <!--LOOP_START:tags--><a href="/tag/{{tag_slug}}"><span class="badge bg-light text-dark border px-2 py-1 me-1">#{{tag_name}}</span></a><!--LOOP_END:tags-->
+                        </div>
+                    </div>
+
+                    <div class="card bg-light border-0 p-3 rounded-4 my-4 text-center">
+                        <h6 class="fw-bold text-dark mb-2">Like this article? Share it with your friends!</h6>
+                        <div class="d-flex justify-content-center gap-2 flex-wrap">
+                            <a target='_blank' rel='nofollow' href="https://www.facebook.com/sharer.php?u={{CANONICAL_URL}}"><button class="btn btn-sm btn-primary rounded-pill px-3"><i class="bi bi-facebook me-1"></i>Facebook</button></a>
+                            <a target='_blank' rel='nofollow' href="https://x.com/intent/tweet?url={{CANONICAL_URL}}?spref%3Dtw&text={{SITE_TITLE}}:{{POST_TITLE}}"><button class="btn btn-sm btn-dark rounded-pill px-3"><i class="bi bi-twitter-x me-1"></i>Twitter</button></a>
+                            <a target='_blank' rel='nofollow' href="https://wa.me?text={{POST_TITLE}}%20%2D%20{{CANONICAL_URL}}"><button class="btn btn-sm btn-success rounded-pill px-3"><i class="bi bi-whatsapp me-1"></i>WhatsApp</button></a>
+                            <a rel='nofollow' href="{{CANONICAL_URL}}"><button class="btn btn-sm btn-outline-secondary rounded-pill px-3"><i class="bi bi-link-45deg m1-"></i>Copy Link</button></a>
+                        </div>
+                    </div>
+
+                    <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white mb-5 mt-5">
+                        <div class="d-flex flex-column flex-md-row align-items-center align-items-md-start gap-4">
+                            <div class="flex-shrink-0 position-relative">
+                                <img src="{{AUTHOR_AVATAR}}" alt="{{AUTHOR_NAME}}" class="rounded-circle object-fit-cover border border-4 border-white shadow-sm" style="width: 120px; height: 120px;">
+                                <span class="position-absolute bottom-0 end-0 bg-primary text-white border border-2 border-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 32px; height: 32px; transform: translate(-10px, -5px);"><i class="bi bi-check-lg" style="font-size: 1rem;"></i></span>
+                            </div>
+                            <div class="text-center text-md-start w-100">
+                                <div class="mb-3 d-flex flex-column flex-md-row align-items-center justify-content-between gap-2">
+                                    <div>
+                                        <h4 class="fw-bold text-dark mb-1">{{AUTHOR_NAME}}</h4>
+                                        <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-1 rounded-pill small fw-semibold"><i class="bi bi-pen me-1"></i>{{AUTHOR_ROLE}}</span>
+                                    </div>
+                                </div>
+                                <p class="text-secondary small mb-4" style="line-height: 1.8;">{{AUTHOR_BIO}}</p>
+                                <div class="d-flex justify-content-center justify-content-md-start gap-2">
+                                    <a href="{{AUTHOR_WEBSITE}}" target="_blank" class="me-2 text-secondary" title="Website"><i class="bi bi-globe"></i></a>
+                                    <a href="{{AUTHOR_INSTAGRAM}}" target="_blank" class="me-2 text-danger" title="Instagram"><i class="bi bi-instagram"></i></a>
+                                    <a href="{{AUTHOR_FACEBOOK}}" target="_blank" class="me-2 text-primary" title="Facebook"><i class="bi bi-facebook"></i></a>
+                                    <a href="{{AUTHOR_TWITTER}}" target="_blank" class="me-2 text-dark" title="X / Twitter"><i class="bi bi-twitter-x"></i></a>
+                                    <a href="{{AUTHOR_LINKEDIN}}" target="_blank" class="text-primary" title="LinkedIn"><i class="bi bi-linkedin"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 pt-4 border-top">
+                        <h4 class="fw-bold text-dark mb-4"><i class="bi bi-collection text-primary me-2"></i>Related Articles</h4>
+                        <div class="row g-3" id="related-posts-container" data-category="{{POST_CATEGORY}}">
+                            <div class="col-12 text-muted small text-center py-3">Loading related posts...</div>
+                        </div>
+                        <div class="shareaholic-canvas" data-app="recommendations" data-app-id="30636696"></div>
+                    </div>
+
+                    <div id="disqus-section" class="mt-5 pt-4 border-top">
+                        <h4 class="fw-bold text-dark mb-4"><i class="bi bi-chat-square-text text-primary me-2"></i>Comment Section</h4>
+                        <div id="disqus_thread" class="min-vh-25 bg-white p-3 rounded-4 border shadow-sm">
+                            <div class="text-center py-5 text-muted">
+                                <div class="spinner-border text-primary mb-2" role="status"></div>
+                                <p class="small mb-0">The comment section will load when you scroll here...</p>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="sticky-sidebar d-flex flex-column gap-4">
+                    {{SIDEBAR_WIDGETS}}
+                    <div class="bg-white border rounded-4 p-4 shadow-sm">
+                        <h5 class="fw-bold text-dark mb-3 pb-2 border-bottom"><i class="bi bi-clock-history text-primary me-2"></i>Latest Articles</h5>
+                        <div class="d-flex flex-column gap-3" id="recent-posts-container">
+                            <div class="text-muted small text-center py-2">Loading the latest articles...</div>
+                        </div>
+                    </div>
+                    <div class="bg-white border rounded-4 p-4 shadow-sm">
+                        <h5 class="fw-bold text-dark mb-3 pb-2 border-bottom"><i class="bi bi-fire text-danger me-2"></i>Most Popular Articles</h5>
+                        <div class="d-flex flex-column gap-3" id="popular-posts-container">
+                            <div class="text-muted small text-center py-2">Loading popular articles...</div>
+                        </div>
+                    </div>
+                    <div class="bg-white border rounded-4 p-4 shadow-sm">
+                        <h5 class="fw-bold text-dark mb-3 pb-2 border-bottom"><i class="bi bi-tags text-primary me-2"></i>Popular Categories</h5>
+                        <div class="d-flex flex-wrap gap-2" id="popular-categories-container">
+                            <div class="text-muted small py-2">Loading categories...</div>
+                        </div>
+                    </div>
+                    <div class="bg-white border rounded-4 p-4 shadow-sm text-center">
+                        <h5 class="fw-bold text-dark mb-3 pb-2 border-bottom text-start"><i class="bi bi-share text-primary me-2"></i>Follow Us</h5>
+                        <p class="text-muted small text-start">Get holiday promo updates and interesting articles directly on our social media.</p>
+                        <div class="d-flex justify-content-center gap-2 mt-3">
+                            <a href="{{SOCIAL_FACEBOOK}}" class="btn btn-outline-primary rounded-circle" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;"><i class="bi bi-facebook"></i></a>
+                            <a href="{{SOCIAL_TWITTER}}" class="btn btn-outline-dark rounded-circle" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;"><i class="bi bi-twitter-x"></i></a>
+                            <a href="{{SOCIAL_INSTAGRAM}}" class="btn btn-outline-danger rounded-circle" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;"><i class="bi bi-instagram"></i></a>
+                            <a href="{{SOCIAL_YOUTUBE}}" class="btn btn-outline-danger rounded-circle" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;"><i class="bi bi-youtube"></i></a>
+                            <a href="{{SOCIAL_TIKTOK}}" class="btn btn-outline-dark rounded-circle" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;"><i class="bi bi-tiktok"></i></a>
+                            <a href="{{SOCIAL_LINKEDIN}}" class="btn btn-outline-primary rounded-circle" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-color: #0077b5;"><i class="bi bi-linkedin"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    {{BLOCK:subscribe-global}} {{FOOTER_WIDGETS}} {{MODALS}}
+    <script delay="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../assets/js/main.js" defer></script>
+    <script>
+        DisQusShortname = '___DISQUS_FORUM_SHORTNAME___'
+    </script>
+    <script src="../assets/js/disqus.js" defer></script>
+</body>
+
+</html>
